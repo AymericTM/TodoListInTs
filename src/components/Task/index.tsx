@@ -7,9 +7,10 @@ interface TaskProp {
 
     onDelete: () => void;
     onToggle: () => void;
+    onShare: () => void;
 }
 
-function Task({ className = '', onDelete, onToggle, task }: TaskProp) {
+function Task({ className = '', onDelete, onToggle, onShare, task }: TaskProp) {
     return (
         <div className="card-footer-item">
             <p className="subtitle is-5 " style={{ textDecoration: task.done ? 'line-through' : '' }}>
@@ -21,6 +22,9 @@ function Task({ className = '', onDelete, onToggle, task }: TaskProp) {
                 </button>
                 <button className="button is-danger is-rounded is-small" onClick={() => onDelete()}>
                     🗑
+                </button>
+                <button className="button is-danger is-rounded is-small" onClick={() => onShare()}>
+                    🔗
                 </button>
             </div>
         </div>

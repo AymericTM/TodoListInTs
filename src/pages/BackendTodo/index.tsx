@@ -1,51 +1,51 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import Task from '../../components/Task';
-import { ITask } from '../../type';
+import { ITask, TodoI } from '../../type';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
+import { request } from '../../Utils';
 type FormElement = React.FormEvent<HTMLFormElement>;
 
 function Todo() {
     const [newTask, setNewTask] = useState<string>('');
-    const [tasks, setTasks] = useState<ITask[]>([]);
+    const [tasks, setTasks] = useState<TodoI[]>([]);
+    const [reload, setReload] = useState(false);
 
     const taskInput = useRef<HTMLInputElement>(null);
 
     const handleSubmit = (e: FormElement) => {
         e.preventDefault();
-        addTask(newTask);
-        setNewTask('');
-        //console.log(newTask);
-        //console.log(tasks);
-        taskInput.current?.focus();
+        request('post', '/todo/create/', { title: newTask })
+
+            .then(data => {
+
+                console.log(data);
+                setReload(!reload);
+
+            })
+            .catch(err => { })
     };
+    const onDeleteClick = (_id: string) => {
+        request('post', '/todo/delete/', { _id: _id })
 
-    const addTask = (name: string): void => {
-        const newTasks: ITask[] = [...tasks, { name, done: false }];
-        if (name.trim().length >= 3) {
-            setTasks(newTasks);
-        } else {
-            alert('Il task deve contenere 3 o più caratteri validi');
-        }
-    };
+            .then(data => {
 
-    const toggleDoneTask = (i: number): void => {
-        const newTasks: ITask[] = [...tasks];
-        newTasks[i].done = !newTasks[i].done;
-        setTasks(newTasks);
-        taskInput.current?.focus();
-    };
+                console.log(data);
+                setReload(!reload);
 
-    const deleteTask = (i: number): void => {
-        const newTasks: ITask[] = [...tasks];
-        newTasks.splice(i, 1);
-        setTasks(newTasks);
-        taskInput.current?.focus();
-
-    };
-
-    const shareTask = (i: number): void => {
-        alert(i);
+            })
     }
 
+
+
+
+    useEffect(() => {
+        request('get', '/todo/list')
+            .then(data => {
+                setTasks(data);
+            })
+            .catch(() => { });
+    }, [reload])
     return (
         <>
             <div className="container">
@@ -65,8 +65,16 @@ function Todo() {
                             </div>
                         </div>
                         <br />
-                        {tasks.map((t: ITask, i: number) => {
-                            return <Task key={i} task={t} onDelete={() => deleteTask(i)} onToggle={() => toggleDoneTask(i)} onShare={() => shareTask(i)} />;
+                        {tasks.map(task => {
+                            return (
+
+                                <div>
+                                    <p key={task._id}>{task.title}</p>
+                                    <button onClick={() => onDeleteClick(task._id)}>Delete</button>
+                                    <Link to={'/api/' + task._id} >Edit</Link>
+                                    <Link to={'/share/' + task._id + '/' + task.title} >Share</Link>
+                                </div>
+                            )
                         })}
                     </div>
                 </div>
