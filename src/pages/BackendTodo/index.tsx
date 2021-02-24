@@ -9,6 +9,7 @@ type FormElement = React.FormEvent<HTMLFormElement>;
 
 function Todo() {
   const [newTask, setNewTask] = useState<string>("");
+  const [newDescription, setDescription] = useState<string>("");
   const [tasks, setTasks] = useState<TodoI[]>([]);
   const [shareTask, setShareTasks] = useState<TodoI[]>([]);
   const [reload, setReload] = useState(false);
@@ -16,9 +17,13 @@ function Todo() {
   const taskInput = useRef<HTMLInputElement>(null);
   const [selectedTRodo, setSelectedTodo] = useState<TodoI>();
   const [modolEmail, setModalEmail] = useState("");
+
   const handleSubmit = (e: FormElement) => {
     e.preventDefault();
-    request("post", "/todo/create/", { title: newTask })
+    request("post", "/todo/create/", {
+      title: newTask,
+      description: newDescription,
+    })
       .then((data) => {
         console.log(data);
         setReload(!reload);
@@ -76,6 +81,15 @@ function Todo() {
                     ref={taskInput}
                     autoFocus
                   ></input>
+                  <input
+                    className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                    type="text"
+                    placeholder="Click to add description"
+                    onChange={(e) => setDescription(e.target.value)}
+                    value={newDescription}
+                    ref={taskInput}
+                    autoFocus
+                  ></input>
                   <br />
                   <br />
                   <div className="buttons is-right">
@@ -98,6 +112,10 @@ function Todo() {
                       <li className="text-2xl" key={task._id}>
                         {task.title}
                       </li>
+                      <label>
+                        Descrizione:
+                        <p className="font-serif">{task.description}</p>
+                      </label>
                       <button
                         className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full"
                         onClick={() => onDeleteClick(task._id)}
